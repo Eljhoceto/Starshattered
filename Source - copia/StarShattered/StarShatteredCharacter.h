@@ -69,23 +69,5 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-	// --- Integracion con FirstUpgradeDecorator ---
-	
-	// Devuelve el escudo base actual del Rover
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	virtual float GetBaseMaxShield() const;
-
-	// Devuelve la resistencia base de armadura actual del Rover
-	UFUNCTION(BlueprintCallable, Category = "Stats")
-	virtual float GetBaseArmorResistance() const;
-
-protected:
-	// Valores base originales (sin estar decorados)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float BaseMaxShield;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float BaseArmorResistance;
 };
 
