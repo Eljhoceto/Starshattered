@@ -10,6 +10,10 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Patterns/Observer/HealthObserver.h"
+#include "Kismet/GameplayStatics.h"
+#include "InputCoreTypes.h"
+#include "CobrixBasic.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -56,12 +60,24 @@ AStarShatteredCharacter::AStarShatteredCharacter()
 	Health = 100.f;
 	MaxShield = 0.f;
 	Resistance = 0.f;
+
+	HealthObserver = CreateDefaultSubobject<UHealthObserver>(TEXT("HealthObserver"));
 }
 
 void AStarShatteredCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	// Safety: the observer is expected by the architecture to exist in runtime even if a BP child removed it.
+	if (!HealthObserver)
+	{
+		HealthObserver = NewObject<UHealthObserver>(this, TEXT("HealthObserver_Runtime"));
+		if (HealthObserver)
+		{
+			HealthObserver->RegisterComponent();
+		}
+	}
 }
 
 float AStarShatteredCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -112,6 +128,12 @@ void AStarShatteredCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+
+	// Gameplay: bind fire to Left Mouse Button (direct key bind, no asset required)
+	if (PlayerInputComponent)
+	{
+		PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &AStarShatteredCharacter::Attack);
+	}
 }
 
 void AStarShatteredCharacter::Move(const FInputActionValue& Value)
@@ -148,4 +170,47 @@ void AStarShatteredCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AStarShatteredCharacter::Attack()
+{
+	if (!GetWorld())
+	{
+		return;
+	}
+
+	FVector TraceStart;
+	FRotator TraceRot;
+
+	if (FollowCamera)
+	{
+		TraceStart = FollowCamera->GetComponentLocation();
+		TraceRot = FollowCamera->GetComponentRotation();
+	}
+	else
+	{
+		GetActorEyesViewPoint(TraceStart, TraceRot);
+	}
+
+	const FVector TraceEnd = TraceStart + (TraceRot.Vector() * FireRange);
+
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(StarShatteredCharacter_FireTrace), /*bTraceComplex*/ false);
+	Params.AddIgnoredActor(this);
+
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params);
+	if (!bHit)
+	{
+		return;
+	}
+
+	if (ACobrixBasic* Enemy = Cast<ACobrixBasic>(Hit.GetActor()))
+	{
+		UGameplayStatics::ApplyDamage(Enemy, FireDamage, GetController(), this, nullptr);
+	}
+}
+
+void AStarShatteredCharacter::Fire()
+{
+	Attack();
 }

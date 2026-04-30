@@ -1,5 +1,6 @@
 #include "DifficultyFacade.h"
 #include "GameFramework/Actor.h"
+#include "../../CobrixBasic.h"
 
 void UDifficultyFacade::ConfigureEnemiesForLevel(EDifficultyLevel Difficulty, const TArray<AActor*>& Enemies)
 {
@@ -28,12 +29,11 @@ void UDifficultyFacade::ConfigureEnemiesForLevel(EDifficultyLevel Difficulty, co
 		{
 			// TODO: CONEXIÓN EQUIPO (Desarrollador B)
 			// Llama a las funciones de salud y daño de la clase de enemigo aquí.
-			// Ejemplo:
-			// if (IMyEnemyInterface* EnemyRef = Cast<IMyEnemyInterface>(Enemy))
-			// {
-			//     EnemyRef->SetHealth(TargetHealth);
-			//     EnemyRef->SetDamage(TargetDamage);
-			// }
+			if (ACobrixBasic* EnemyRef = Cast<ACobrixBasic>(Enemy))
+			{
+			    EnemyRef->SetHealth(TargetHealth);
+			    EnemyRef->SetDamage(TargetDamage);
+			}
 		}
 	}
 }

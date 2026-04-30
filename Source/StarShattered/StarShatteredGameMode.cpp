@@ -8,6 +8,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "CobrixBasic.h"
 
 AStarShatteredGameMode::AStarShatteredGameMode()
 {
@@ -30,15 +31,24 @@ void AStarShatteredGameMode::BeginPlay()
 	UWorld* World = GetWorld();
 	if (World)
 	{
+		// Instanciar el Facade ANTES del Builder para que el Builder pueda usarlo
+		DifficultyFacade = NewObject<UDifficultyFacade>(this, UDifficultyFacade::StaticClass());
+
 		// Instanciar el Builder
 		LevelBuilder = World->SpawnActor<AEarthLevelBuilder>(AEarthLevelBuilder::StaticClass());
 		if (LevelBuilder)
 		{
 			LevelBuilder->BuildLevel();
-		}
 
-		// Instanciar el Facade
-		DifficultyFacade = NewObject<UDifficultyFacade>(this, UDifficultyFacade::StaticClass());
+			// Tarea 3: Conectar el Decorator a las muertes de los enemigos
+			for (AActor* EnemyActor : LevelBuilder->GetSpawnedEnemies())
+			{
+				if (ACobrixBasic* Enemy = Cast<ACobrixBasic>(EnemyActor))
+				{
+					Enemy->OnEnemyDead.AddDynamic(this, &AStarShatteredGameMode::OnEnemyDefeated);
+				}
+			}
+		}
 
 		// Instanciar el Decorator
 		// Casting Correcto: Usando AStarShatteredCharacter y asegurando el include correcto
@@ -57,3 +67,12 @@ void AStarShatteredGameMode::BeginPlay()
 		}
 	}
 }
+
+void AStarShatteredGameMode::OnEnemyDefeated()
+{
+	if (FirstUpgradeDecorator)
+	{
+		FirstUpgradeDecorator->NotifyEnemyDefeated();
+	}
+}
+

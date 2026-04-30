@@ -5,6 +5,8 @@
 #include "HealthObserver.generated.h"
 
 class AStarShatteredCharacter;
+class UUserWidget;
+class UStarShatteredHUD;
 
 /**
  * UHealthObserver
@@ -18,6 +20,9 @@ class STARSHATTERED_API UHealthObserver : public UActorComponent
 
 public:	
 	UHealthObserver();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Observer")
+	TSubclassOf<UUserWidget> HealthWidgetClass;
 
 	/**
 	 * Vincula este observador al delegado de salud del jugador.
@@ -34,4 +39,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(Transient)
+	TObjectPtr<UStarShatteredHUD> HealthWidgetInstance = nullptr;
 };

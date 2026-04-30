@@ -12,6 +12,8 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+class UHealthObserver;
+class ACobrixBasic;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedDelegate, float, NewHealth);
 
@@ -61,7 +63,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float Resistance;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Observer", meta = (AllowPrivateAccess = "true"))
+	UHealthObserver* HealthObserver;
+
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void Attack();
+
+	// Backwards-compatible alias (previous iteration)
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void Fire();
 protected:
 
 	/** Called for movement input */
@@ -83,5 +95,12 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float FireRange = 1000.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float FireDamage = 25.0f;
 };
 

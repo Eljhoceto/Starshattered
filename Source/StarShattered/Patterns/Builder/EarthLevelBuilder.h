@@ -5,6 +5,7 @@
 #include "EarthLevelBuilder.generated.h"
 
 class AStarShatteredCharacter;
+class ACharacter;
 
 /**
  * AEarthLevelBuilder
@@ -17,6 +18,8 @@ class STARSHATTERED_API AEarthLevelBuilder : public AActor
 	
 public:	
 	AEarthLevelBuilder();
+
+	const TArray<AActor*>& GetSpawnedEnemies() const { return SpawnedEnemies; }
 
 	/**
 	 * Construye el Nivel 1.
@@ -37,7 +40,7 @@ public:
 
 	// Clase genérica de enemigo a spawnear
 	UPROPERTY(EditAnywhere, Category = "Level Design")
-	TSubclassOf<class AActor> EnemyClassToSpawn;
+	TSubclassOf<ACharacter> EnemyClassToSpawn;
 
 	// Clase de la Nave de Robert
 	UPROPERTY(EditAnywhere, Category = "Level Design")

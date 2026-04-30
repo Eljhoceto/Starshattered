@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "CobrixBasic.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDead);
+
 UCLASS()
 class STARSHATTERED_API ACobrixBasic : public ACharacter
 {
@@ -26,4 +28,39 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnEnemyDead OnEnemyDead;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float BaseDamage;
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void TakeEnemyDamage(float Amount);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void SetHealth(float NewHealth) { Health = NewHealth; }
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void SetDamage(float NewDamage) { BaseDamage = NewDamage; }
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "AI|Combat")
+	float AttackRange = 150.0f;
+
+	UPROPERTY(EditAnywhere, Category = "AI|Combat")
+	float AttackCooldownSeconds = 2.0f;
+
+	UPROPERTY(EditAnywhere, Category = "AI|Movement")
+	float ChaseAcceptanceRadius = 60.0f;
+
+	UPROPERTY(EditAnywhere, Category = "AI|Combat")
+	TObjectPtr<class UAnimMontage> AttackMontage = nullptr;
+
+	float LastAttackTimeSeconds = -10000.0f;
+	bool bWarnedNavMesh = false;
 };

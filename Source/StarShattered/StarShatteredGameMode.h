@@ -20,6 +20,12 @@ class AStarShatteredGameMode : public AGameModeBase
 public:
 	AStarShatteredGameMode();
 
+	UFUNCTION(BlueprintCallable, Category = "Patterns")
+	UDifficultyFacade* GetDifficultyFacade() const { return DifficultyFacade; }
+
+	UFUNCTION()
+	void OnEnemyDefeated();
+
 protected:
 	virtual void BeginPlay() override;
 
