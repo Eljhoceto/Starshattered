@@ -1,20 +1,22 @@
-# Visual Studio
+# Unreal Engine 5 ignores
+Intermediate/
+Binaries/
+Saved/
 .vs/
+DerivedDataCache/
+Build/
 *.sln
+*.opensdf
 *.suo
 *.user
-*.userosscache
-*.sln.docstates
+*.sdf
 
-# Unreal Engine - Generated
-Binaries/
-DerivedDataCache/
-Intermediate/
-Saved/
-Build/
+# Visual Studio ignores
+.vscode/
+.vs/
+*.VC.db
+*.VC.opendb
 
-# Otros
-.gradle/
-.idea/
-.settings/
-*.bak
+# Mac / Linux temp files
+.DS_Store
+Thumbs.db
