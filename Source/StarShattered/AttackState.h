@@ -15,4 +15,10 @@ class STARSHATTERED_API UAttackState : public UObject, public IEnemyState
 public:
 	virtual void EnterState(AStarshatteredAIController* AIController) override;
 	virtual void UpdateState(AStarshatteredAIController* AIController, float DeltaTime) override;
+
+private:
+	// Variables para gestionar el disparo y la distancia
+	float CooldownTimer = 0.0f;
+	const float AttackCooldown = 2.0f;
+	const float AttackRange = 800.0f;
 };
