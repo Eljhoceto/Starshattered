@@ -1,3 +1,8 @@
+
+
+
+
+
 #include "CobrixBasic.h"
 #include "ObjectPoolManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -9,6 +14,7 @@
 #include "Engine/Engine.h"
 #include "Animation/AnimMontage.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PlasmaProjectile.h"
 
 // Sets default values
 ACobrixBasic::ACobrixBasic()
@@ -91,6 +97,37 @@ void ACobrixBasic::Tick(float DeltaTime)
 			}
 
 			UGameplayStatics::ApplyDamage(Player, BaseDamage, AICon, this, nullptr);
+		}
+	}
+	else if (DistToPlayer <= ShootRange)
+	{
+		if (AICon->LineOfSightTo(Player))
+		{
+			const float Now = GetWorld()->GetTimeSeconds();
+			if ((Now - LastShootTimeSeconds) >= ShootCooldownSeconds)
+			{
+				LastShootTimeSeconds = Now;
+
+				// Lógica visual del proyectil (similar a CobrixBasicAttack)
+				FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 150.0f);
+				FVector DirectionToPlayer = (PlayerLocation - SpawnLocation).GetSafeNormal();
+				FRotator SpawnRotation = DirectionToPlayer.Rotation();
+				FTransform SpawnTransform(SpawnRotation, SpawnLocation);
+
+				AObjectPoolManager* PoolManager = Cast<AObjectPoolManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AObjectPoolManager::StaticClass()));
+				if (PoolManager)
+				{
+					AActor* Projectile = PoolManager->AcquireActor(APlasmaProjectile::StaticClass(), SpawnTransform);
+					if (Projectile)
+					{
+						Projectile->SetInstigator(this);
+						Projectile->SetOwner(this);
+					}
+				}
+
+				// Aplicar daño directo simulando el impacto del disparo (hitscan)
+				UGameplayStatics::ApplyDamage(Player, 15.0f, AICon, this, nullptr);
+			}
 		}
 	}
 
